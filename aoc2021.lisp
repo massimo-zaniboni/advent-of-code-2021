@@ -490,20 +490,6 @@
         (sum mn into smn)
         (finally (return (* smn wn)))))
 
-(with-open-file (in #P"data/day-4-test.txt" :direction :input)
-  (let+ (((ne en) (parse-board-extractions in)))
-
-    (iter (for b = (make-instance 'board :number->exctraction ne :extraction->number en))
-          (for b? = (parse-board! b in))
-          (while b?)
-          (collect b at beginning)
-          (after-each
-           (format t "~%~a~%score: ~a ; winner-extraction: ~a ; winner-number: ~a ; ~%"
-                   (board-show b)
-                   (board-score b)
-                   (board-winner-extraction b)
-                   (board-winner-number b))))))
-
 (defun select-board (fn &key select-best?)
   (with-open-file (in fn)
     (let+ (((ne en) (parse-board-extractions in)))
