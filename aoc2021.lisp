@@ -527,17 +527,6 @@
 
 ; # Day 5
 
-(let* ((one 1)
-      (a `(1 2))
-      (b `(,one 2)))
-  (equal a b)
-  )
- ; => NIL
-
-(str:split-omit-nulls "->" "0,9 -> 5,9")
-
-(make-hash-table)
-
 (defun parse-dgm-line (s)
   (let+ (((x1y1 x2y2) (str:split-omit-nulls " -> " s))
          ((x1 y1) (str:split-omit-nulls "," x1y1))
@@ -546,29 +535,6 @@
 
 (parse-dgm-line "0,9 -> 5,9")
 ; => 0, 9, 5, 9
-
-  (iter (for line in-file #P"data/day5-test.txt" using #'read-line)
-        (with dgm = (make-hash-table :test #'equal))
-        (for (values x1 y1 x2 y2) = (parse-dgm-line line))
-        (after-each
-           (cond
-             ((and (= x1 x2) (= y2 y2))
-              (incf (gethash `(,x1 ,y1) dgm 0)))
-
-             ((= x1 x2)
-              (iter (for y from (min y1 y2) to (max y1 y2))
-                    (after-each (incf (gethash `(,x1 ,y) dgm 0)))))
-
-             ((= y1 y2)
-              (iter (for x from (min x1 x2) to (max x1 x2))
-                    (after-each (incf (gethash `(,x ,y1) dgm 0)))))))
-        (finally
-          (return (iter (for (k v) in-hashtable dgm)
-               (after-each
-                  (format t "~a: ~a" k v))
-               (finally (return dgm))
-           )))
-    )
 
 (defun day5a (fn)
   (iter (for line in-file fn using #'read-line)
@@ -617,10 +583,11 @@
                    (incf (gethash `(,x ,y) dgm 0))
                    (when (and (= x x2) (= y y2)) (finish)))))
         (finally
-          (return (iter (for (nil collisions) in-hashtable dgm)
-                (with c = 0)
-                (after-each (when (>= collisions 2) (incf c)))
-                (finally (return c)))))))
+          (return
+            (iter (for (nil collisions) in-hashtable dgm)
+                  (with c = 0)
+                  (after-each (when (>= collisions 2) (incf c)))
+                  (finally (return c)))))))
 
 (day5b #P"data/day5-test.txt")
  ; => 12 (4 bits, #xC, #o14, #b1100)
