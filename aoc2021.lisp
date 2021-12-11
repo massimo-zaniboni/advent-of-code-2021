@@ -594,3 +594,67 @@
 
 (day5b #P"data/day5.txt")
  ; => 22335 (15 bits, #x573F)
+
+; # Day 6
+
+(defun make-empty-group-arr ()
+  (make-array 9 :element-type 'integer :initial-element 0))
+
+(defun group-arr-init! (arr initial-group)
+  (iter (for n in-sequence initial-group)
+        (after-each (incf (aref arr n)))))
+
+(defun day6a (fn days)
+  (with-open-file (in fn)
+    (let* ((initial-group (map 'list #'parse-integer (str:split-omit-nulls "," (read-line in))))
+           (arr1 (make-empty-group-arr))
+           (arr2 (make-empty-group-arr)))
+
+    (group-arr-init! arr1 initial-group)
+
+    (iter (for day from 1 to days)
+          (after-each
+            (let* ((g0 (aref arr1 0))
+                   (g7 (aref arr1 7))
+                   (g8 (aref arr1 8)))
+
+               (iter (for i from 1 to 6)
+                     (for j = (- i 1))
+                     (after-each
+                      (setf (aref arr2 j) (aref arr1 i))))
+
+               (setf (aref arr2 8) g0)
+               (setf (aref arr2 7) g8)
+               (setf (aref arr2 6) (+ g0 g7))
+               (rotatef arr1 arr2))
+            )
+
+          (finally
+             (return
+               (values
+                  (iter (for n in-sequence arr1) (sum n))
+                  arr1)))))))
+
+(day6a #P"data/day6-test.txt" 1)
+
+(day6a #P"data/day6-test.txt" 2)
+
+(day6a #P"data/day6-test.txt" 18)
+ ; => 26, #(3 5 3 2 2 1 5 1 4)
+
+(day6a #P"data/day6-test.txt" 80)
+ ; => 5934, #(424 729 558 790 739 762 991 370 571)
+
+(day6a #P"data/day6.txt" 80)
+ ; => 359344, #(25370 43475 34217 45238 46830 43688 63018 21499 36009)
+
+(day6a #P"data/day6-test.txt" 256)
+;  => 26984457539
+; #(2376852196 2731163883 2897294544 3164316379 3541830408 3681986557 4275812629
+;   1985489551 2329711392)
+;
+
+(day6a #P"data/day6.txt" 256)
+;  => 1629570219571
+; #(144177205175 163803187106 176535811181 189353957920 215600615915 221062131589
+;   258892122126 119527669001 140617519558)
